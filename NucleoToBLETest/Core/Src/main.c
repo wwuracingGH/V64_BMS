@@ -95,6 +95,8 @@ int main(void)
   // Multiple slaves not supported
   // SPI clocks can be 2,4, or 8 MHz
 
+  // branch lock test
+
   // Test blocking
 
   uint8_t blockingmsg[] = "Test SPI transmit via software\r\n";
