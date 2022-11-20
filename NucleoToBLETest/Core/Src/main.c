@@ -31,6 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define TIMEOUT 100			// SPI Timeout
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -47,7 +48,7 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -84,8 +85,34 @@ int main(void)
   /* Initialize all configured peripherals */
   /* USER CODE BEGIN 2 */
 
-  uint8_t Test[] = "TODO: Configure Codeless & Send data via BLE\r\n"; //Data to send
+  uint8_t Msg1[] = "TODO: Configure Codeless & Send data via BLE\r\n"; //Data to send
   HAL_UART_Transmit(&huart2,Test,sizeof(Test),10);// Sending in normal mode
+
+  uint8_t data[] = "test";
+  uint16_t Size = sizeof(data);
+
+  // DA1451 must be master for SPI operation over codeless
+  // Multiple slaves not supported
+  // SPI clocks can be 2,4, or 8 MHz
+
+  // Test blocking
+
+  uint8_t blockingmsg[] = "Test SPI transmit via software\r\n";
+  HAL_UART_Transmit(&huart2,blockingmsg,sizeof(blockingmsg),10);
+  HAL_SPI_Transmit(&hspi1, data, Size, Timeout);
+
+  // Test interrupt
+
+  uint8_t interruptmsg[] = "Test SPI transmit via interrupt\r\n";
+  HAL_UART_Transmit(&huart2,interruptmsg,sizeof(interruptmsg),10);
+  HAL_SPI_Transmit(&hspi1, data, Size, Timeout);
+
+  // Test DMA
+
+  uint8_t dmamsg[] = "Test SPI transmit via DMA\r\n";
+  HAL_UART_Transmit(&huart2,dmamsg,sizeof(dmamsg),10);
+  HAL_SPI_Transmit(&hspi1, data, Size, Timeout);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -135,7 +162,10 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef * hspi)
+{
+    // TX Done .. Do Something ...
+}
 /* USER CODE END 4 */
 
 /**

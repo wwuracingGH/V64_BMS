@@ -97,7 +97,6 @@ int main(void)
 
   uint8_t Test[] = "TODO: Configure and test MAX\r\n"; //Data to send
   HAL_UART_Transmit(&huart2,Test,sizeof(Test),10);// Sending in normal mode
-  HAL_Delay(1000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
