@@ -18,10 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "MaxFrontEnd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -33,19 +32,6 @@
 /* USER CODE BEGIN PD */
 #define SPI_TIMEOUT 50
 
-#define ECS_HIGH 	0x80 //If on, enable cell selection
-#define SC0_HIGH 	0x40 //Select cell for voltage readout during hold phase
-#define SC1_HIGH 	0x20
-#define SC2_HIGH 	0x10
-#define SC3_HIGH 	0x08
-#define SMPLB_HIGH 	0x04 //If on, in hold phase. Else, if sampl input high, then in sample phase
-#define DIAG_HIGH 	0x02 //If on, in diagnostic mode (10uA sunk on all cell inputs)
-#define LOPW_HIGH 	0x01 //If on, low power mode enabled
-
-#define SAMPLE_DELAY 45 //time to stay in sample phase, in ms
-#define HOLD_DELAY 1	//time to transition into hold phase, in us
-#define LEVEL_SHIFT_DELAY 55 //time to shift cap voltages to ground reference, in us
-#define SETTLING_DELAY 50 //time to let a_out settle, in us
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -98,7 +84,6 @@ void delay_us(uint16_t us) {
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -107,14 +92,12 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
   /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -124,14 +107,6 @@ int main(void)
   MX_SPI2_Init();
   MX_TIM14_Init();
   /* USER CODE BEGIN 2 */
-  uint8_t u1_buffer_in[] = { 0x00, 0x00, 0x80 };
-  uint8_t *balance_low = &u1_buffer_in[0];
-  uint8_t *balance_high = &u1_buffer_in[1];
-  uint8_t *config = &u1_buffer_in[2];
-
-  float cell_voltages[4] = { 0 };
-
-  uint32_t buffer_out[2] = { 0x01234567, 0x89ABCDEF};
   /* USER CODE END 2 */
 
   /* Infinite loop */
