@@ -57,12 +57,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Vcell_U1_Pin GPIO_PIN_5
-#define Vcell_U1_GPIO_Port GPIOA
-#define NSS1_U1_Pin GPIO_PIN_0
-#define NSS1_U1_GPIO_Port GPIOB
-#define NSS1_U6_Pin GPIO_PIN_3
-#define NSS1_U6_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

@@ -18,9 +18,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "MaxFrontEnd.h"
+#include "TempMonitor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -30,8 +32,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define SPI_TIMEOUT 50
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,8 +56,8 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_SPI2_Init(void);
 static void MX_TIM14_Init(void);
+static void MX_SPI2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -65,16 +65,6 @@ static void MX_TIM14_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-//wait for a given number of microseconds
-//taken from https://controllerstech.com/create-1-microsecond-delay-stm32/
-void delay_us(uint16_t us) {
-	//set the counter value to 0
-	__HAL_TIM_SET_COUNTER(&htim14,0);
-
-	//wait for the counter to reach the given microsecond value
-	//we've configured the timer to tick once every microsecond, so we don't have to weight the values
-	while (__HAL_TIM_GET_COUNTER(&htim14) < us);
-}
 /* USER CODE END 0 */
 
 /**
@@ -104,89 +94,18 @@ int main(void)
   MX_GPIO_Init();
   MX_ADC1_Init();
   MX_SPI1_Init();
-  MX_SPI2_Init();
   MX_TIM14_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  do {
-	/* USER CODE END WHILE */
+  while(1) {
+    /* USER CODE END WHILE */
 
-	/* USER CODE BEGIN 3 */
-
-	uint8_t receive_sync[4] = {0xde, 0xad, 0xda, 0xed};
-	uint8_t transmit_sync[4] = {0xbe, 0xef, 0xfe, 0xeb};
-	//sync up with BMS controller
-	HAL_SPI_Receive(&hspi2, receive_sync, 1, SPI_TIMEOUT*5);
-	//HAL_SPI_Transmit(&hspi2, (uint8_t *) buffer_out, 8, SPI_TIMEOUT);
-	//continue;
-
-	//charge up sample capacitors
-	*balance_low = 0;
-	*balance_high = 0;
-	*config = 0;
-
-	//start sample phase - charge up sample capacitors
-	HAL_SPI_Transmit(&hspi1, u1_buffer_in, 3, SPI_TIMEOUT);
-
-	//wait for sample phase to complete, at least 40 ms
-	HAL_Delay(SAMPLE_DELAY);
-
-	//start hold phase
-	*config = SMPLB_HIGH;
-	HAL_SPI_Transmit(&hspi1, u1_buffer_in, 3, SPI_TIMEOUT);
-
-	//wait for sample cap voltages to shift to ground reference, at least 50.5 us
-	delay_us(HOLD_DELAY + LEVEL_SHIFT_DELAY);
-
-	*balance_low = 0;
-	*balance_high = 0;
-	//Measure voltage of every set of cells
-	int lowest_cell = 0;
-	int highest_cell = 0;
-	for (int i = 0; i < 4; i++) {
-		*config = ECS_HIGH;
-		//Set SC0 and SC1, depending on the value of i
-		//Since we're only measuring 4 cells, SC2 and SC3 are always 0
-		int cell = i;
-		if (i / 2 != 0) {
-			cell -= 2;
-			*config = *config || SC1_HIGH;
-		}
-		if (cell == 1) {
-			*config = *config || SC0_HIGH;
-		}
-		//tell MAX14920 to measure voltage of cell i
-		HAL_SPI_Transmit(&hspi1, u1_buffer_in, 3, SPI_TIMEOUT);
-
-		//Time delay to allow voltage measurement to settle.
-		//According to MAX14920 datasheet, we should have a delay of over 5us.
-		//I was gonna do this with a bunch of NOP instructions, but it turns out
-		//	that reading from ADC takes a few microseconds anyways.
-		//  		for (int j = 0; j < 200; j++) {
-		//  			asm("NOP");
-		//  		}
-
-		//read voltage of cell i from ADC
-		HAL_ADC_Start(&hadc1);
-		HAL_ADC_PollForConversion(&hadc1, 2);
-		cell_voltages[i] = HAL_ADC_GetValue(&hadc1) / 4096.0 * 15100 / 10000;
-		if (cell_voltages[i] > cell_voltages[highest_cell]) {
-			highest_cell = i;
-		} else if (cell_voltages[i] < cell_voltages[lowest_cell]) {
-			lowest_cell = i;
-		}
-	}
-
-	buffer_out[0] = 12345687;//cell_voltages[lowest_cell];
-	buffer_out[1] = 89012344;//cell_voltages[highest_cell];
-
-	//send cell voltages to BMS controller
-	HAL_SPI_Transmit(&hspi2, (uint8_t *) buffer_out, 8, SPI_TIMEOUT*50);
-	continue;
-	} while (0);
+    /* USER CODE BEGIN 3 */
+  }
   /* USER CODE END 3 */
 }
 
@@ -276,7 +195,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_5;
+  sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLINGTIME_COMMON_1;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -312,7 +231,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -351,7 +270,7 @@ static void MX_SPI2_Init(void)
   hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_HARD_INPUT;
+  hspi2.Init.NSS = SPI_NSS_SOFT;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -380,6 +299,8 @@ static void MX_TIM14_Init(void)
 
   /* USER CODE END TIM14_Init 0 */
 
+  TIM_IC_InitTypeDef sConfigIC = {0};
+
   /* USER CODE BEGIN TIM14_Init 1 */
 
   /* USER CODE END TIM14_Init 1 */
@@ -390,6 +311,22 @@ static void MX_TIM14_Init(void)
   htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim14.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim14) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_IC_Init(&htim14) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim14, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIMEx_TISelection(&htim14, TIM_TIM14_TI1_MCO, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -413,14 +350,17 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, NSS1_U1_Pin|NSS1_U6_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_5
+                          |GPIO_PIN_7, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : NSS1_U1_Pin NSS1_U6_Pin */
-  GPIO_InitStruct.Pin = NSS1_U1_Pin|NSS1_U6_Pin;
+  /*Configure GPIO pins : PA1 PA2 PA3 PA5
+                           PA7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_5
+                          |GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 }
 

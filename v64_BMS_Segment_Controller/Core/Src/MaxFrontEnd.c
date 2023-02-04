@@ -5,81 +5,108 @@
  *      Author: brandonramirez
  */
 
+#include "stm32g0xx_hal.h"
+#include "MaxFrontEnd.h"
+
 SPI_HandleTypeDef hspi;
 ADC_HandleTypeDef hadc;
+TIM_HandleTypeDef htim;
 
+// SPI Transmission Buffer
 uint8_t u1_buffer_in[] = { 0x00, 0x00, 0x80 };
-uint8_t *balance_low = &u1_buffer_in[0];
-uint8_t *balance_high = &u1_buffer_in[1];
-uint8_t *config = &u1_buffer_in[2];
-
-float cell_voltages[4] = { 0 };
-
+// SPI Receiver buffer
 uint32_t buffer_out[2] = { 0x01234567, 0x89ABCDEF};
 
-void maxInit() {
+// MAX SPI control buffer pointers
+uint8_t *lower8 = &u1_buffer_in[0];
+uint8_t *upper8 = &u1_buffer_in[1];
+uint8_t *config = &u1_buffer_in[2];
 
+
+// Voltage Data
+float cell_voltages[8] = { 0 };
+int lowest_cell = 0;
+int highest_cell = 0;
+
+/*
+ * Private function definitions
+ */
+void maxInit(SPI_HandleTypeDef maxSPI, ADC_HandleTypeDef maxADC, TIM_HandleTypeDef maxHTIM) {
+	hspi = maxSPI;
+	hadc = maxADC;
+	htim = maxHTIM;
 }
 
-//wait for a given number of microseconds
-//taken from https://controllerstech.com/create-1-microsecond-delay-stm32/
 void delay_us(uint16_t us) {
-	//set the counter value to 0
-	__HAL_TIM_SET_COUNTER(&htim14,0);
-
-	//wait for the counter to reach the given microsecond value
-	//we've configured the timer to tick once every microsecond, so we don't have to weight the values
-	while (__HAL_TIM_GET_COUNTER(&htim14) < us);
+	__HAL_TIM_SET_COUNTER(&htim,0);
+	while (__HAL_TIM_GET_COUNTER(&htim) < us);
 }
 
-void MaxSampleCharges() {
+// Takes integer and returns 8 bit big endian selection
+uint8_t selectCell(uint8_t cellNum) {
+	uint8_t selection = 0;
+	// If even number
+	if(cellNum%2 == 0) {
+		selection |= SC0_HIGH;
+	}
+	if(cellNum == 3||4||7||8) {
+		selection |= SC1_HIGH;
+	}
+	if(cellNum == 5||6||7||8) {
+		selection |= SC2_HIGH;
+	}
+	return selection;
+}
 
-	//charge up sample capacitors
-	*balance_low = 0;
-	*balance_high = 0;
+/*
+ * Public function definitions
+ */
+void MaxSampleCharges(SPI_HandleTypeDef hspi) {
+
+
+	//Empty transmission buffer and start sample phase
+	*lower8 = 0;
+	*upper8 = 0;
 	*config = 0;
-
-	//start sample phase - charge up sample capacitors
-	HAL_SPI_Transmit(&hspi, u1_buffer_in, 3, SPI_TIMEOUT);
+	HAL_SPI_Transmit(&hspi, u1_buffer_in, BYTE_COUNT, SPI_TIMEOUT);
 
 	//wait for sample phase to complete, at least 40 ms
 	HAL_Delay(SAMPLE_DELAY);
 
 	//start hold phase
 	*config = SMPLB_HIGH;
-	HAL_SPI_Transmit(&hspi, u1_buffer_in, 3, SPI_TIMEOUT);
+	HAL_SPI_Transmit(&hspi, u1_buffer_in, BYTE_COUNT, SPI_TIMEOUT);
 
 	//wait for sample cap voltages to shift to ground reference, at least 50.5 us
 	delay_us(HOLD_DELAY + LEVEL_SHIFT_DELAY);
 
-	*balance_low = 0;
-	*balance_high = 0;
+	*lower8 = 0;
+	*upper8 = 0;
+
+	 //uint8_t blockingmsg[] = "Test SPI transmit via software\r\n";
+	 //HAL_UART_Transmit(&huart2,blockingmsg,sizeof(blockingmsg),10);
+
 	//Measure voltage of every set of cells
-	int lowest_cell = 0;
-	int highest_cell = 0;
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 8; i++) {
+
+		// Reset config register to only ECS_HIGH
 		*config = ECS_HIGH;
-		//Set SC0 and SC1, depending on the value of i
-		//Since we're only measuring 4 cells, SC2 and SC3 are always 0
-		int cell = i;
-		if (i / 2 != 0) {
-			cell -= 2;
-			*config = *config || SC1_HIGH;
-		}
-		if (cell == 1) {
-			*config = *config || SC0_HIGH;
-		}
+
+		// Select desired cell
+		*config |= selectCell(i);
+
 		//tell MAX14920 to measure voltage of cell i
-		HAL_SPI_Transmit(&hspi1, u1_buffer_in, 3, SPI_TIMEOUT);
+		HAL_SPI_Transmit(&hspi, u1_buffer_in, BYTE_COUNT, SPI_TIMEOUT);
 
 		//Time delay to allow voltage measurement to settle.
 		//According to MAX14920 datasheet, we should have a delay of over 5us.
 		//Reading from ADC takes a few microseconds anyways.
+		delay_us(10);
 
 		//read voltage of cell i from ADC
-		HAL_ADC_Start(&hadc1);
-		HAL_ADC_PollForConversion(&hadc1, 2);
-		cell_voltages[i] = HAL_ADC_GetValue(&hadc1) / 4096.0 * 15100 / 10000;
+		HAL_ADC_Start(&hadc);
+		HAL_ADC_PollForConversion(&hadc, ADC_TIMEOUT);
+		cell_voltages[i] = HAL_ADC_GetValue(&hadc) / 4096.0 * 15100 / 10000;
 		if (cell_voltages[i] > cell_voltages[highest_cell]) {
 			highest_cell = i;
 		} else if (cell_voltages[i] < cell_voltages[lowest_cell]) {
@@ -87,10 +114,13 @@ void MaxSampleCharges() {
 		}
 	}
 
+	/*
 	buffer_out[0] = 12345687;//cell_voltages[lowest_cell];
 	buffer_out[1] = 89012344;//cell_voltages[highest_cell];
 
 	//send cell voltages to BMS controller
 	HAL_SPI_Transmit(&hspi2, (uint8_t *) buffer_out, 8, SPI_TIMEOUT*50);
 	continue;
+	*/
 }
+
