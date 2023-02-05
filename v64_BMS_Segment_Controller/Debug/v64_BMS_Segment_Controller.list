@@ -27,23 +27,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000028  00000000  00000000  0002000c  2**0
                   CONTENTS, READONLY
- 12 .debug_info   0000d3d9  00000000  00000000  00020034  2**0
+ 12 .debug_info   0000d3d8  00000000  00000000  00020034  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 00001e0d  00000000  00000000  0002d40d  2**0
+ 13 .debug_abbrev 00001df5  00000000  00000000  0002d40c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 00000e28  00000000  00000000  0002f220  2**3
+ 14 .debug_aranges 00000e28  00000000  00000000  0002f208  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_ranges 00000d40  00000000  00000000  00030048  2**3
+ 15 .debug_ranges 00000d40  00000000  00000000  00030030  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  00001d70  00000000  00000000  00030d88  2**0
+ 16 .debug_macro  00001d67  00000000  00000000  00030d70  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0000f726  00000000  00000000  00032af8  2**0
+ 17 .debug_line   0000f715  00000000  00000000  00032ad7  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0008c3a4  00000000  00000000  0004221e  2**0
+ 18 .debug_str    0008c2b3  00000000  00000000  000421ec  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000050  00000000  00000000  000ce5c2  2**0
+ 19 .comment      00000050  00000000  00000000  000ce49f  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00003384  00000000  00000000  000ce614  2**2
+ 20 .debug_frame  00003384  00000000  00000000  000ce4f0  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -259,10 +259,10 @@ int main(void)
  8000224:	f000 f98a 	bl	800053c <MX_GPIO_Init>
   MX_ADC1_Init();
  8000228:	f000 f850 	bl	80002cc <MX_ADC1_Init>
-  MX_SPI1_Init();
- 800022c:	f000 f8b8 	bl	80003a0 <MX_SPI1_Init>
   MX_TIM14_Init();
- 8000230:	f000 f92e 	bl	8000490 <MX_TIM14_Init>
+ 800022c:	f000 f930 	bl	8000490 <MX_TIM14_Init>
+  MX_SPI1_Init();
+ 8000230:	f000 f8b6 	bl	80003a0 <MX_SPI1_Init>
   MX_SPI2_Init();
  8000234:	f000 f8f2 	bl	800041c <MX_SPI2_Init>
   /* USER CODE BEGIN 2 */

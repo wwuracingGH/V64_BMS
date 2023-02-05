@@ -31,6 +31,7 @@ int highest_cell = 0;
 /*
  * Private function definitions
  */
+
 void maxInit(SPI_HandleTypeDef maxSPI, ADC_HandleTypeDef maxADC, TIM_HandleTypeDef maxHTIM) {
 	hspi = maxSPI;
 	hadc = maxADC;
@@ -61,6 +62,7 @@ uint8_t selectCell(uint8_t cellNum) {
 /*
  * Public function definitions
  */
+
 void MaxSampleCharges(SPI_HandleTypeDef hspi) {
 
 
@@ -82,9 +84,6 @@ void MaxSampleCharges(SPI_HandleTypeDef hspi) {
 
 	*lower8 = 0;
 	*upper8 = 0;
-
-	 //uint8_t blockingmsg[] = "Test SPI transmit via software\r\n";
-	 //HAL_UART_Transmit(&huart2,blockingmsg,sizeof(blockingmsg),10);
 
 	//Measure voltage of every set of cells
 	for (int i = 0; i < 8; i++) {
@@ -123,4 +122,3 @@ void MaxSampleCharges(SPI_HandleTypeDef hspi) {
 	continue;
 	*/
 }
-
