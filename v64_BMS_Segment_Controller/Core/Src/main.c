@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-//#include "MaxFrontEnd.h"
+#include "MaxFrontEnd.h"
 #include "TempMonitor.h"
 /* USER CODE END Includes */
 
@@ -96,6 +96,7 @@ int main(void)
   MX_SPI1_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
+  MaxInit(hspi1,hadc1,htim14);
   /* USER CODE END 2 */
 
   /* Infinite loop */

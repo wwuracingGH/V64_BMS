@@ -1,4 +1,4 @@
-../Core/Src/MaxFrontEnd.c:35:6:maxInit	16	static
+../Core/Src/MaxFrontEnd.c:35:6:MaxInit	16	static
 ../Core/Src/MaxFrontEnd.c:41:6:delay_us	16	static
 ../Core/Src/MaxFrontEnd.c:47:9:selectCell	24	static
-../Core/Src/MaxFrontEnd.c:66:6:MaxSampleCharges	24	static
+../Core/Src/MaxFrontEnd.c:66:6:MaxSampleCharges	16	static

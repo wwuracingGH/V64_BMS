@@ -8,9 +8,9 @@
 #include "stm32g0xx_hal.h"
 #include "MaxFrontEnd.h"
 
-SPI_HandleTypeDef hspi;
-ADC_HandleTypeDef hadc;
-TIM_HandleTypeDef htim;
+SPI_HandleTypeDef maxspi;
+ADC_HandleTypeDef maxadc;
+TIM_HandleTypeDef maxtim;
 
 // SPI Transmission Buffer
 uint8_t u1_buffer_in[] = { 0x00, 0x00, 0x80 };
@@ -32,15 +32,15 @@ int highest_cell = 0;
  * Private function definitions
  */
 
-void maxInit(SPI_HandleTypeDef maxSPI, ADC_HandleTypeDef maxADC, TIM_HandleTypeDef maxHTIM) {
-	hspi = maxSPI;
-	hadc = maxADC;
-	htim = maxHTIM;
+void MaxInit(SPI_HandleTypeDef hspi, ADC_HandleTypeDef hadc, TIM_HandleTypeDef htim) {
+	maxspi = hspi;
+	maxadc = hadc;
+	maxtim = htim;
 }
 
 void delay_us(uint16_t us) {
-	__HAL_TIM_SET_COUNTER(&htim,0);
-	while (__HAL_TIM_GET_COUNTER(&htim) < us);
+	__HAL_TIM_SET_COUNTER(&maxtim,0);
+	while (__HAL_TIM_GET_COUNTER(&maxtim) < us);
 }
 
 // Takes integer and returns 8 bit big endian selection
@@ -63,21 +63,21 @@ uint8_t selectCell(uint8_t cellNum) {
  * Public function definitions
  */
 
-void MaxSampleCharges(SPI_HandleTypeDef hspi) {
+void MaxSampleCharges() {
 
 
 	//Empty transmission buffer and start sample phase
 	*lower8 = 0;
 	*upper8 = 0;
 	*config = 0;
-	HAL_SPI_Transmit(&hspi, u1_buffer_in, BYTE_COUNT, SPI_TIMEOUT);
+	HAL_SPI_Transmit(&maxspi, u1_buffer_in, BYTE_COUNT, SPI_TIMEOUT);
 
 	//wait for sample phase to complete, at least 40 ms
 	HAL_Delay(SAMPLE_DELAY);
 
 	//start hold phase
 	*config = SMPLB_HIGH;
-	HAL_SPI_Transmit(&hspi, u1_buffer_in, BYTE_COUNT, SPI_TIMEOUT);
+	HAL_SPI_Transmit(&maxspi, u1_buffer_in, BYTE_COUNT, SPI_TIMEOUT);
 
 	//wait for sample cap voltages to shift to ground reference, at least 50.5 us
 	delay_us(HOLD_DELAY + LEVEL_SHIFT_DELAY);
@@ -95,7 +95,7 @@ void MaxSampleCharges(SPI_HandleTypeDef hspi) {
 		*config |= selectCell(i);
 
 		//tell MAX14920 to measure voltage of cell i
-		HAL_SPI_Transmit(&hspi, u1_buffer_in, BYTE_COUNT, SPI_TIMEOUT);
+		HAL_SPI_Transmit(&maxspi, u1_buffer_in, BYTE_COUNT, SPI_TIMEOUT);
 
 		//Time delay to allow voltage measurement to settle.
 		//According to MAX14920 datasheet, we should have a delay of over 5us.
@@ -103,9 +103,9 @@ void MaxSampleCharges(SPI_HandleTypeDef hspi) {
 		delay_us(10);
 
 		//read voltage of cell i from ADC
-		HAL_ADC_Start(&hadc);
-		HAL_ADC_PollForConversion(&hadc, ADC_TIMEOUT);
-		cell_voltages[i] = HAL_ADC_GetValue(&hadc) / 4096.0 * 15100 / 10000;
+		HAL_ADC_Start(&maxadc);
+		HAL_ADC_PollForConversion(&maxadc, ADC_TIMEOUT);
+		cell_voltages[i] = HAL_ADC_GetValue(&maxadc) / 4096.0 * 15100 / 10000;
 		if (cell_voltages[i] > cell_voltages[highest_cell]) {
 			highest_cell = i;
 		} else if (cell_voltages[i] < cell_voltages[lowest_cell]) {
