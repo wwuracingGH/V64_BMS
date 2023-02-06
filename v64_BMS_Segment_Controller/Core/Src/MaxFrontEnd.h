@@ -1,8 +1,8 @@
 /*
  * MaxAFE.h
  *
- *  Created on: Jan 28, 2023
- *      Author: brandonramirez
+ * 2022 Peter Schinske
+ * 2023 Brandon Ramirez
  */
 
 #ifndef SRC_MAXAFE_H_
@@ -33,10 +33,13 @@
 #define ADC_TIMEOUT 5
 
 #define BYTE_COUNT 3
+#define NUM_CELLS 8
 
 /*
- * Public variables
+ * Public function declarations
  */
-
+void MaxInit(SPI_HandleTypeDef maxSPI, ADC_HandleTypeDef maxADC, TIM_HandleTypeDef maxHTIM);
+void MaxSampleCharges();
+void MaxDischargeCells(uint8_t cell);
 
 #endif /* SRC_MAXAFE_H_ */

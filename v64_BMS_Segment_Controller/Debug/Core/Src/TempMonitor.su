@@ -1,0 +1,3 @@
+../Core/Src/TempMonitor.c:22:6:TMInit	16	static
+../Core/Src/TempMonitor.c:29:6:tmRead	16	static
+../Core/Src/TempMonitor.c:36:6:tmSelectThermistor	40	static
