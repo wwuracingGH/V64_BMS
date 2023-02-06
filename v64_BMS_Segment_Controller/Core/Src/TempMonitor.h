@@ -8,7 +8,7 @@
 #ifndef SRC_TEMPMONITOR_H_
 #define SRC_TEMPMONITOR_H_
 
-#define NUMTHERMISTORS 13
+#define NUMTHERMISTORS 14
 
 /*
  * Public Variables

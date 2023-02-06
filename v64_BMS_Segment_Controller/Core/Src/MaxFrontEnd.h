@@ -40,5 +40,6 @@
  */
 void MaxInit(SPI_HandleTypeDef maxSPI, ADC_HandleTypeDef maxADC, TIM_HandleTypeDef maxHTIM);
 void MaxSampleCharges();
+void MaxDischargeCells(uint8_t cell);
 
 #endif /* SRC_MAXAFE_H_ */

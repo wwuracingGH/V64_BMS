@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "MaxFrontEnd.h"
@@ -103,7 +102,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while(1) {
     /* USER CODE END WHILE */
-
+	  MaxSampleCharges();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

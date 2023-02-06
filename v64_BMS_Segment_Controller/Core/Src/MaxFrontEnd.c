@@ -14,19 +14,17 @@ TIM_HandleTypeDef maxtim;
 
 // SPI Transmission Buffer
 uint8_t u1_buffer_in[] = { 0x00, 0x00, 0x80 };
-// SPI Receiver buffer
-uint32_t buffer_out[2] = { 0x01234567, 0x89ABCDEF};
 
 // MAX SPI control buffer pointers
-uint8_t *lower8 = &u1_buffer_in[0];
-uint8_t *upper8 = &u1_buffer_in[1];
+uint8_t *balanceLower = &u1_buffer_in[0];
+uint8_t *balanceUpper = &u1_buffer_in[1];
 uint8_t *config = &u1_buffer_in[2];
 
 
 // Voltage Data
 float cell_voltages[8] = { 0 };
-int lowest_cell = 0;
-int highest_cell = 0;
+uint8_t lowest_cell = 0;
+uint8_t highest_cell = 0;
 
 /*
  * Private function definitions
@@ -47,28 +45,34 @@ void delay_us(uint16_t us) {
 uint8_t selectCell(uint8_t cellNum) {
 	uint8_t selection = 0;
 	// If even number
-	if(cellNum%2 == 0) {
+	if(cellNum%2 != 0 && cellNum != 0) {
 		selection |= SC0_HIGH;
 	}
-	if(cellNum == 3||4||7||8) {
-		selection |= SC1_HIGH;
-	}
-	if(cellNum == 5||6||7||8) {
-		selection |= SC2_HIGH;
-	}
+
+	//TODO: Bit manipulation for cell selection
 	return selection;
 }
 
 /*
  * Public function definitions
  */
+void MaxDischargeCells(uint8_t cell) {
+	//for(int i = 0; i < NUM_CELLS; i++) {
+	//}
+	// Test Discharge LEDs
+	*balanceLower = 0xFF;
+	*balanceUpper = 0xFF;
+	*config = 0;
+	HAL_SPI_Transmit(&maxspi, u1_buffer_in, BYTE_COUNT, SPI_TIMEOUT);
+
+}
 
 void MaxSampleCharges() {
 
 
 	//Empty transmission buffer and start sample phase
-	*lower8 = 0;
-	*upper8 = 0;
+	*balanceLower = 0;
+	*balanceUpper = 0;
 	*config = 0;
 	HAL_SPI_Transmit(&maxspi, u1_buffer_in, BYTE_COUNT, SPI_TIMEOUT);
 
@@ -80,10 +84,10 @@ void MaxSampleCharges() {
 	HAL_SPI_Transmit(&maxspi, u1_buffer_in, BYTE_COUNT, SPI_TIMEOUT);
 
 	//wait for sample cap voltages to shift to ground reference, at least 50.5 us
-	delay_us(HOLD_DELAY + LEVEL_SHIFT_DELAY);
-
-	*lower8 = 0;
-	*upper8 = 0;
+	//delay_us(HOLD_DELAY + LEVEL_SHIFT_DELAY);
+	HAL_Delay(1);
+	*balanceLower = 0;
+	*balanceUpper = 0;
 
 	//Measure voltage of every set of cells
 	for (int i = 0; i < 8; i++) {
@@ -100,7 +104,8 @@ void MaxSampleCharges() {
 		//Time delay to allow voltage measurement to settle.
 		//According to MAX14920 datasheet, we should have a delay of over 5us.
 		//Reading from ADC takes a few microseconds anyways.
-		delay_us(10);
+		//delay_us(10);
+		HAL_Delay(1);
 
 		//read voltage of cell i from ADC
 		HAL_ADC_Start(&maxadc);
@@ -112,13 +117,4 @@ void MaxSampleCharges() {
 			lowest_cell = i;
 		}
 	}
-
-	/*
-	buffer_out[0] = 12345687;//cell_voltages[lowest_cell];
-	buffer_out[1] = 89012344;//cell_voltages[highest_cell];
-
-	//send cell voltages to BMS controller
-	HAL_SPI_Transmit(&hspi2, (uint8_t *) buffer_out, 8, SPI_TIMEOUT*50);
-	continue;
-	*/
 }
