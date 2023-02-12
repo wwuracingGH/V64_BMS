@@ -25,12 +25,12 @@
  * Timings
  */
 
-#define SAMPLE_DELAY 45 //time to stay in sample phase, in ms
-#define HOLD_DELAY 1	//time to transition into hold phase, in us
-#define LEVEL_SHIFT_DELAY 55 //time to shift cap voltages to ground reference, in us
-#define SETTLING_DELAY 50 //time to let a_out settle, in us
-#define SPI_TIMEOUT 50
-#define ADC_TIMEOUT 5
+#define T_SAMPLE 40 //time to stay in sample phase, in ms
+#define T_HOLD 1	//time to transition into hold phase, in us
+#define T_LS_DELAY 25 //time to shift cap voltages to ground reference, in us
+#define T_SET 5 //time to let a_out settle, in us
+#define SPI_TIMEOUT 500
+#define ADC_TIMEOUT 50
 
 #define BYTE_COUNT 3
 #define NUM_CELLS 8
@@ -38,7 +38,7 @@
 /*
  * Public function declarations
  */
-void MaxInit(SPI_HandleTypeDef maxSPI, ADC_HandleTypeDef maxADC, TIM_HandleTypeDef maxHTIM);
+void MaxInit(SPI_HandleTypeDef *maxSPI, ADC_HandleTypeDef *maxADC, TIM_HandleTypeDef *maxHTIM);
 void MaxSampleCharges();
 void MaxDischargeCells(uint8_t cell);
 void ADC_Select_CH0(void);
