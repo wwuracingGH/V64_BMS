@@ -1,3 +1,4 @@
+"./Core/Src/BLESegment.o"
 "./Core/Src/MaxFrontEnd.o"
 "./Core/Src/TempMonitor.o"
 "./Core/Src/main.o"

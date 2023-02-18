@@ -9,6 +9,7 @@
 #define SRC_TEMPMONITOR_H_
 
 #define NUMTHERMISTORS 14
+#define ADC_TIMEOUT 10
 
 /*
  * Public Variables
@@ -21,7 +22,7 @@
 /*
  * Public function declarations
  */
-void TMInit(ADC_HandleTypeDef TMhadc);
+void TMInit(ADC_HandleTypeDef *hadc1, ADC_HandleTypeDef *hadc2);
 
 
 #endif /* SRC_TEMPMONITOR_H_ */
