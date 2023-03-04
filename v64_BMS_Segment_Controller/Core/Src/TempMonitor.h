@@ -9,7 +9,6 @@
 #define SRC_TEMPMONITOR_H_
 
 #define NUMTHERMISTORS 14
-#define ADC_TIMEOUT 10
 
 /*
  * Public Variables
