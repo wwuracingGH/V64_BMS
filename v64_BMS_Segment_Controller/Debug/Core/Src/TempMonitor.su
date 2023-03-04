@@ -1,3 +1,5 @@
-../Core/Src/TempMonitor.c:22:6:TMInit	16	static
-../Core/Src/TempMonitor.c:29:6:tmRead	16	static
-../Core/Src/TempMonitor.c:36:6:tmSelectThermistor	40	static
+../Core/Src/TempMonitor.c:30:6:TMInit	16	static
+../Core/Src/TempMonitor.c:38:6:tmRead	48	static
+../Core/Src/TempMonitor.c:58:6:tmSelect	16	static
+../Core/Src/TempMonitor.c:64:8:tmConvertToTemps	16	static
+../Core/Src/TempMonitor.c:69:10:Read_ADC	40	static
