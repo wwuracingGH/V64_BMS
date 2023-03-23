@@ -1,7 +1,8 @@
-../Core/Src/MaxFrontEnd.c:39:6:delay_us	16	static
-../Core/Src/MaxFrontEnd.c:44:6:MaxInit	24	static
-../Core/Src/MaxFrontEnd.c:55:9:selectCell	40	static
-../Core/Src/MaxFrontEnd.c:66:6:MaxDischargeCell	16	static
-../Core/Src/MaxFrontEnd.c:73:6:MaxDischargeTest	16	static
-../Core/Src/MaxFrontEnd.c:102:6:MaxSampleCharges	24	static
-../Core/Src/MaxFrontEnd.c:164:6:maxCalibrate	24	static
+../Core/Src/MaxFrontEnd.c:47:6:MaxInit	24	static
+../Core/Src/MaxFrontEnd.c:61:6:MaxDischargeCell	16	static
+../Core/Src/MaxFrontEnd.c:74:6:MaxDischargeTest	16	static
+../Core/Src/MaxFrontEnd.c:109:6:MaxSampleCharges	24	static
+../Core/Src/MaxFrontEnd.c:179:6:ADC_Select_CH7	24	static
+../Core/Src/MaxFrontEnd.c:196:13:delay_us	16	static
+../Core/Src/MaxFrontEnd.c:207:9:selectCell	40	static
+../Core/Src/MaxFrontEnd.c:222:6:maxCalibrate	24	static

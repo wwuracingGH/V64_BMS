@@ -1,0 +1,2 @@
+../Core/Src/BLESegment.c:21:6:BLESegmentInit	16	static
+../Core/Src/BLESegment.c:37:6:I2C_EV_IRQHandler	16	static

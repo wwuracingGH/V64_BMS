@@ -1,5 +1,8 @@
-../Core/Src/TempMonitor.c:30:6:TMInit	16	static
-../Core/Src/TempMonitor.c:38:6:tmRead	48	static
-../Core/Src/TempMonitor.c:58:6:tmSelect	16	static
-../Core/Src/TempMonitor.c:64:8:tmConvertToTemps	16	static
-../Core/Src/TempMonitor.c:69:10:Read_ADC	40	static
+../Core/Src/TempMonitor.c:38:6:TMInit	16	static
+../Core/Src/TempMonitor.c:49:6:TMSampleTemps	88	static
+../Core/Src/TempMonitor.c:90:6:TMGetTemps	32	static
+../Core/Src/TempMonitor.c:103:6:ADC_Select_CH0	24	static
+../Core/Src/TempMonitor.c:119:6:ADC_Select_CH6	24	static
+../Core/Src/TempMonitor.c:135:6:tmSelect	16	static
+../Core/Src/TempMonitor.c:151:7:tmConvertToTemp	40	static
+../Core/Src/TempMonitor.c:172:7:tmConvertCtoF	16	static
